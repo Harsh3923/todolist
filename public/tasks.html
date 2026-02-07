@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TaskBoard - Tasks</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <nav class="nav">
+    <a href="/">Home</a>
+    <a href="/tasks">Tasks</a>
+    <a href="/about">About</a>
+  </nav>
+
+  <main class="container">
+    <h1>Tasks</h1>
+
+    <form id="addForm" class="row">
+      <input
+        id="titleInput"
+        type="text"
+        placeholder="New task title..."
+        required
+        maxlength="80"
+        autocomplete="off"
+      />
+      <button class="button" type="submit">Add</button>
+    </form>
+
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+
+    <ul id="taskList" class="list"></ul>
+  </main>
+
+  <script>
+    const taskList = document.getElementById("taskList");
+    const statusEl = document.getElementById("status");
+    const addForm = document.getElementById("addForm");
+    const titleInput = document.getElementById("titleInput");
+
+    let statusTimeout;
+
+    function setStatus(msg) {
+      statusEl.textContent = msg || "";
+    }
+
+    // Shows a message and keeps it visible briefly (so loadTasks() doesn't wipe it instantly)
+    function showStatus(msg, duration = 1500) {
+      clearTimeout(statusTimeout);
+      setStatus(msg);
+      statusTimeout = setTimeout(() => setStatus(""), duration);
+    }
+
+    async function safeReadJson(res) {
+      try {
+        return await res.json();
+      } catch {
+        return {};
+      }
+    }
+
+    function setBusy(isBusy) {
+      titleInput.disabled = isBusy;
+      addForm.querySelector("button").disabled = isBusy;
+    }
+
+    async function loadTasks() {
+      // Only show loading if there isn't already an important message showing
+      if (!statusEl.textContent) setStatus("Loading...");
+
+      try {
+        const res = await fetch("/api/tasks"); // GET
+
+        if (!res.ok) {
+          const err = await safeReadJson(res);
+          showStatus(err.error || "Failed to load tasks", 2500);
+          return;
+        }
+
+        const data = await safeReadJson(res);
+        renderTasks(Array.isArray(data.items) ? data.items : []);
+        if (statusEl.textContent === "Loading...") setStatus("");
+      } catch (e) {
+        showStatus("Network error: could not reach server", 2500);
+      }
+    }
+
+    function renderTasks(tasks) {
+      taskList.innerHTML = "";
+
+      if (!tasks.length) {
+        const empty = document.createElement("li");
+        empty.className = "listItem";
+        empty.textContent = "No tasks yet — add one above.";
+        taskList.appendChild(empty);
+        return;
+      }
+
+      tasks.forEach(task => {
+        const li = document.createElement("li");
+        li.className = "listItem";
+
+        const title = document.createElement("span");
+        title.textContent = `#${task.id} — ${task.title}`;
+
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.className = "danger";
+
+        delBtn.onclick = async () => {
+          setStatus("Deleting...");
+          delBtn.disabled = true;
+
+          try {
+            const res = await fetch(`/api/tasks/${task.id}`, { method: "DELETE" }); // DELETE
+
+            const data = await safeReadJson(res);
+
+            if (!res.ok) {
+              showStatus(data.error || "Delete failed", 2500);
+              delBtn.disabled = false;
+              return;
+            }
+
+            showStatus(data.message || "Task deleted");
+            await loadTasks();
+          } catch (e) {
+            showStatus("Network error: could not reach server", 2500);
+            delBtn.disabled = false;
+          }
+        };
+
+        li.appendChild(title);
+        li.appendChild(delBtn);
+        taskList.appendChild(li);
+      });
+    }
+
+    addForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const title = titleInput.value.trim();
+      if (!title) {
+        showStatus("Please enter a task title.", 2000);
+        return;
+      }
+
+      setBusy(true);
+      setStatus("Adding...");
+
+      try {
+        const res = await fetch("/api/tasks", {
+          method: "POST", // POST
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title })
+        });
+
+        const data = await safeReadJson(res);
+
+        if (!res.ok) {
+          showStatus(data.error || "Add failed", 2500);
+          setBusy(false);
+          return;
+        }
+
+        titleInput.value = "";
+        showStatus(data.message || "Task added");
+        await loadTasks();
+      } catch (e) {
+        showStatus("Network error: could not reach server", 2500);
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    // Initial load
+    loadTasks();
+  </script>
+</body>
+</html>
