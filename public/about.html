@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TaskBoard - About</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <nav class="nav">
+    <a href="/">Home</a>
+    <a href="/tasks">Tasks</a>
+    <a href="/about">About</a>
+  </nav>
+
+  <main class="container">
+    <h1>About</h1>
+    <p>This app demonstrates client-server interaction using Express and a JSON list stored on the server.</p>
+
+    <h2>API Endpoints</h2>
+    <ul>
+      <li>GET <code>/api/tasks</code></li>
+      <li>POST <code>/api/tasks</code> with JSON body: <code>{"title":"..."}</code></li>
+      <li>DELETE <code>/api/tasks/:id</code></li>
+    </ul>
+  </main>
+</body>
+</html>
