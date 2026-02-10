@@ -6,6 +6,7 @@ TaskBoard is a simple multi-page to-do list web application built using **Node.j
 This project was developed to meet the requirements of CPS630 Assignment 1 and focuses on understanding how a **Node.js** server handles different types of requests, how data can be managed using JSON, and how multiple web pages can interact with a backend server. The application is intentionally kept simple to clearly demonstrate these core concepts.
 
 In the future, TaskBoard could be extended by adding a database to store tasks permanently instead of using an in-memory JSON object. Additional features such as editing tasks, marking tasks as completed, or improving the user interface could also be added. These extensions would build on the same structure used in this assignment while introducing more advanced functionality.
+
 ---
 
 ## Technologies Used
