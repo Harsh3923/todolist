@@ -29,19 +29,19 @@ In the future, TaskBoard could be extended by adding a database to store tasks p
 
 ---
 
-## Application Pages
+## Application Pages / HTML Routes
 
-### Home Page (`/`)
+### Home Page (`/`) -- GET /
 - Introduction to the application
 - Navigation to other pages
 
-### Tasks Page (`/tasks`)
+### Tasks Page (`/tasks`) -- GET /tasks
 - Displays the list of tasks (GET request)
 - Allows users to add a new task (POST request)
 - Allows users to delete an existing task (DELETE request)
 - Displays status messages confirming actions
 
-### About Page (`/about`)
+### About Page (`/about`) -- GET /about
 - Describes the application
 - Lists available REST API endpoints
 
@@ -49,7 +49,7 @@ In the future, TaskBoard could be extended by adding a database to store tasks p
 
 ## REST API
 
-### GET – Retrieve All Tasks
+### GET – Retrieve All Tasks (GET /api/tasks)
 
 **Response:**
 - Status: `200 OK`
@@ -57,19 +57,20 @@ In the future, TaskBoard could be extended by adding a database to store tasks p
 
 ---
 
-### POST – Add a Task
+### POST – Add a Task (POST /api/tasks)
 **Request Body (JSON):**
 ```json
 {
   "title": "Task title"
 }
 ```
-### Delete a Task
+### Delete a Task (DELETE /api/tasks/:id)
 DELETE /api/tasks/:id
 
 
 ### Responses
 - `200 OK` – Task successfully deleted
+- `201 Created` - Task sucessfully added
 - `400 Bad Request` – Invalid task ID
 - `404 Not Found` – Task does not exist
 
